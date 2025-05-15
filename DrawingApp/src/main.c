@@ -12,6 +12,10 @@
 #define SCREEN_WIDTH   320
 #define SCREEN_HEIGHT  180
 
+// Pixel size of the draw area 
+#define DRAW_WIDTH     32
+#define DRAW_HEIGHT    18
+
 #define WINDOW_TITLE   "Drawing Program"
 
 #define NUM_MOUSE_BTNS 8
@@ -32,6 +36,8 @@ struct {
     bool quit;
     float zoom;
     v2i topLeft;
+
+    uint32_t drawColor;
 
     v2i dist;
 } state;
@@ -91,6 +97,7 @@ int init() {
     state.quit = false;
     state.zoom = 1.0f;
     state.topLeft = (v2i){ 0, 0 };
+    state.drawColor = 0x000000FF;
 
     return 0;
 }
@@ -141,11 +148,11 @@ void get_input() {
 v2i mouse_to_screen() {
     v2i mouseLoc;
 
-    int scaleX = *state.winW / (SCREEN_WIDTH / state.zoom); // Needs fixing for error
+    int scaleX = *state.winW / (SCREEN_WIDTH / state.zoom);
     int scaleY = *state.winH / (SCREEN_HEIGHT / state.zoom);
 
-    mouseLoc.i = (input.mouseX - state.topLeft.i - (input.mouseX % scaleX)) / scaleX;
-    mouseLoc.j = (input.mouseY - state.topLeft.j - (input.mouseY % scaleY)) / scaleY;
+    mouseLoc.i = (input.mouseX - state.topLeft.i) / scaleX;
+    mouseLoc.j = (input.mouseY - state.topLeft.j) / scaleY;
 
     return mouseLoc;
 }
@@ -162,20 +169,28 @@ bool loc_on_screen(v2i loc) {
 void update() {
     v2i mouseLoc = mouse_to_screen();
 
+    // Select color
+    if (input.isKeyboard[SDL_SCANCODE_1]) {
+        state.drawColor = 0xFF0000FF;
+    } else if (input.isKeyboard[SDL_SCANCODE_2]) {
+        state.drawColor = 0x00FF00FF;
+    } else if (input.isKeyboard[SDL_SCANCODE_3]) {
+        state.drawColor = 0x0000FFFF;
+    }
+
     // Draw a pixel
     if (input.isMouse[SDL_BUTTON_LEFT]) {
         if (loc_on_screen(mouseLoc)) {
-            state.pixels[loc_to_index(mouseLoc)] = 0xFF0000FF;
+            state.pixels[loc_to_index(mouseLoc)] = state.drawColor;
         }
     }
 
     // Get some initial distance between the top left corner of the image and the mouse
     if (input.isMouseClick[SDL_BUTTON_MIDDLE]) {
         state.dist = (v2i){ input.mouseX - state.topLeft.i, input.mouseY - state.topLeft.j };
-        printf("%d %d\n", state.dist.i, state.dist.j);
     }
 
-    // Move the image, if mouse clicked
+    // Move the image, if mouse middle wheel
     if (input.isMouse[SDL_BUTTON_MIDDLE]) {
         state.topLeft = (v2i){ input.mouseX - state.dist.i, input.mouseY - state.dist.j };
     }
