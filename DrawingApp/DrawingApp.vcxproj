@@ -151,7 +151,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\input.c" />
     <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\window.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\input.h" />
+    <ClInclude Include="src\vec2.h" />
+    <ClInclude Include="src\window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
